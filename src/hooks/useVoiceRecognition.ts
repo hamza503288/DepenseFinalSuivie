@@ -23,9 +23,22 @@ export function useVoiceRecognition() {
     typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
 
   const start = useCallback(
-    (onResult: (transcript: string, parsed: ParsedExpense) => void, lang: string = 'ar-SA') => {
+    async (onResult: (transcript: string, parsed: ParsedExpense) => void, lang: string = 'ar-SA') => {
       if (!isSupported) {
         setError("La reconnaissance vocale n'est pas supportée par ce navigateur.")
+        return
+      }
+
+      setError(null)
+
+      // Demande explicite de l'accès micro : certains navigateurs renvoient
+      // "service-not-allowed" côté SpeechRecognition si la permission n'a
+      // jamais été accordée explicitement au préalable via getUserMedia.
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach((track) => track.stop())
+      } catch {
+        setError('Accès au microphone refusé.')
         return
       }
 
@@ -37,7 +50,6 @@ export function useVoiceRecognition() {
       recognition.maxAlternatives = 4
       recognitionRef.current = recognition
 
-      setError(null)
       setTranscript('')
 
       recognition.onstart = () => setIsListening(true)
