@@ -1,102 +1,114 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { parseExpenseText } from '@/lib/parser/darjaParser'
+import { supabaseAnonKey, supabaseUrl } from '@/lib/supabase'
 import type { ParsedExpense } from '@/types'
 
 /**
- * Capture vocale via la Web Speech API du navigateur.
+ * Capture vocale : enregistrement micro dans le navigateur (MediaRecorder),
+ * puis transcription via une Edge Function Supabase qui relaie l'audio à
+ * l'API Hugging Face (Whisper). On a abandonné la reconnaissance vocale
+ * native du navigateur (`webkitSpeechRecognition`) : trop peu fiable selon
+ * navigateurs/régions (erreurs `service-not-allowed` fréquentes, dépendante
+ * d'un service Google hors de notre contrôle).
  *
- * Aucun moteur grand public ne propose de modèle "arabe tunisien" dédié : on
- * capture donc en arabe standard ('ar-SA'), la langue la plus proche
- * phonétiquement, et c'est le parser darja (voir lib/parser) qui interprète
- * le texte obtenu — y compris ses imperfections — plutôt que de dépendre
- * d'une reconnaissance parfaite. Comme la reconnaissance retourne plusieurs
- * hypothèses (`maxAlternatives`), on fait parser chacune et on garde celle
- * dont le parsing donne la meilleure confiance.
+ * Le parser darja interprète le texte obtenu — y compris ses imperfections —
+ * plutôt que de dépendre d'une transcription parfaite.
  */
+const MIME_CANDIDATES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
+
+function pickSupportedMimeType(): string | null {
+  if (typeof MediaRecorder === 'undefined') return null
+  return MIME_CANDIDATES.find((type) => MediaRecorder.isTypeSupported(type)) ?? null
+}
+
 export function useVoiceRecognition() {
   const [isListening, setIsListening] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   const isSupported =
-    typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
+    typeof navigator !== 'undefined' &&
+    Boolean(navigator.mediaDevices?.getUserMedia) &&
+    pickSupportedMimeType() !== null
 
-  const start = useCallback(
-    async (onResult: (transcript: string, parsed: ParsedExpense) => void, lang: string = 'ar-SA') => {
-      if (!isSupported) {
-        setError("La reconnaissance vocale n'est pas supportée par ce navigateur.")
-        return
-      }
+  const start = useCallback(async (onResult: (transcript: string, parsed: ParsedExpense) => void) => {
+    if (!isSupported) {
+      setError("L'enregistrement vocal n'est pas supporté par ce navigateur.")
+      return
+    }
 
-      setError(null)
+    setError(null)
+    setTranscript('')
 
-      // Demande explicite de l'accès micro : certains navigateurs renvoient
-      // "service-not-allowed" côté SpeechRecognition si la permission n'a
-      // jamais été accordée explicitement au préalable via getUserMedia.
+    let stream: MediaStream
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch {
+      setError('Accès au microphone refusé.')
+      return
+    }
+
+    streamRef.current = stream
+    const mimeType = pickSupportedMimeType()!
+    const recorder = new MediaRecorder(stream, { mimeType })
+    mediaRecorderRef.current = recorder
+    const chunks: BlobPart[] = []
+
+    recorder.ondataavailable = (event) => {
+      if (event.data.size > 0) chunks.push(event.data)
+    }
+
+    recorder.onstop = async () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+      setIsListening(false)
+
+      if (chunks.length === 0) return
+
+      const audioBlob = new Blob(chunks, { type: mimeType })
+      setIsTranscribing(true)
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach((track) => track.stop())
+        const response = await fetch(`${supabaseUrl}/functions/v1/speech-to-text`, {
+          method: 'POST',
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            'Content-Type': mimeType,
+          },
+          body: audioBlob,
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          setError(data.error ?? 'Échec de la transcription vocale.')
+          return
+        }
+
+        const text = (data.text ?? '').trim()
+        if (!text) {
+          setError('Aucune parole détectée, réessayez.')
+          return
+        }
+
+        setTranscript(text)
+        onResult(text, parseExpenseText(text))
       } catch {
-        setError('Accès au microphone refusé.')
-        return
+        setError('Problème réseau pendant la transcription vocale.')
+      } finally {
+        setIsTranscribing(false)
       }
+    }
 
-      const Ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition!
-      const recognition = new Ctor()
-      recognition.lang = lang
-      recognition.continuous = false
-      recognition.interimResults = true
-      recognition.maxAlternatives = 4
-      recognitionRef.current = recognition
-
-      setTranscript('')
-
-      recognition.onstart = () => setIsListening(true)
-      recognition.onend = () => setIsListening(false)
-
-      recognition.onerror = (event) => {
-        const messages: Record<string, string> = {
-          'no-speech': "Aucune parole détectée, réessayez.",
-          'not-allowed': "Accès au microphone refusé.",
-          'audio-capture': 'Aucun microphone détecté.',
-          network: 'Problème réseau pendant la reconnaissance vocale.',
-        }
-        setError(messages[event.error] ?? `Erreur de reconnaissance vocale (${event.error}).`)
-        setIsListening(false)
-      }
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const result = event.results[event.results.length - 1]
-        let bestText = ''
-        let bestParsed: ParsedExpense | null = null
-
-        for (let i = 0; i < result.length; i++) {
-          const candidateText = result[i].transcript
-          const parsed = parseExpenseText(candidateText)
-          if (!bestParsed || parsed.confidence > bestParsed.confidence) {
-            bestParsed = parsed
-            bestText = candidateText
-          }
-        }
-
-        setTranscript(bestText)
-
-        if (result.isFinal && bestParsed) {
-          onResult(bestText, bestParsed)
-        }
-      }
-
-      recognition.start()
-    },
-    [isSupported],
-  )
+    recorder.start()
+    setIsListening(true)
+  }, [isSupported])
 
   const stop = useCallback(() => {
-    recognitionRef.current?.stop()
+    mediaRecorderRef.current?.stop()
   }, [])
 
-  useEffect(() => () => recognitionRef.current?.abort(), [])
-
-  return { isSupported, isListening, transcript, error, start, stop }
+  return { isSupported, isListening, isTranscribing, transcript, error, start, stop }
 }

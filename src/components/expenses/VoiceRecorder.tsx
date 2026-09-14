@@ -17,7 +17,7 @@ interface VoiceRecorderProps {
  * directement au clavier doit être aussi simple que parler.
  */
 export function VoiceRecorder({ onParsed }: VoiceRecorderProps) {
-  const { isSupported, isListening, transcript, error, start, stop } = useVoiceRecognition()
+  const { isSupported, isListening, isTranscribing, transcript, error, start, stop } = useVoiceRecognition()
   const [manualMode, setManualMode] = useState(!isSupported)
   const [manualText, setManualText] = useState('')
 
@@ -26,6 +26,7 @@ export function VoiceRecorder({ onParsed }: VoiceRecorderProps) {
       stop()
       return
     }
+    if (isTranscribing) return
     start((_text, parsed) => onParsed(parsed))
   }
 
@@ -43,7 +44,8 @@ export function VoiceRecorder({ onParsed }: VoiceRecorderProps) {
           <motion.button
             onClick={handleMicClick}
             whileTap={{ scale: 0.92 }}
-            className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg transition-colors ${
+            disabled={isTranscribing}
+            className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg transition-colors disabled:opacity-60 ${
               isListening ? 'bg-red-600 animate-pulse-ring' : 'bg-brand-500'
             }`}
             aria-label={isListening ? 'Arrêter l\'enregistrement' : 'Démarrer l\'enregistrement vocal'}
@@ -52,9 +54,11 @@ export function VoiceRecorder({ onParsed }: VoiceRecorderProps) {
           </motion.button>
 
           <p className="min-h-[1.5rem] text-sm text-[var(--text-secondary)]">
-            {isListening
-              ? transcript || 'Je t\'écoute… parle en darja !'
-              : 'Appuie et raconte ta dépense'}
+            {isTranscribing
+              ? 'Transcription en cours…'
+              : isListening
+                ? 'Je t\'écoute… parle en darja !'
+                : transcript || 'Appuie et raconte ta dépense'}
           </p>
 
           {error && <p className="text-xs font-medium text-status-critical">{error}</p>}

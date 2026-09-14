@@ -17,7 +17,7 @@ import {
   TENS,
   HUNDRED_WORDS,
   THOUSAND_WORDS,
-  AND_WORD,
+  AND_WORDS,
   CURRENCY_DINAR,
   CURRENCY_MILLIME,
   EXPENSE_VERBS,
@@ -105,7 +105,7 @@ function extractWordAmount(tokens: string[]): AmountResult | null {
     let usedThousand = THOUSAND_WORDS.includes(t)
 
     // Combinaison unité + "w" + dizaine, ou dizaine + "w" + unité (ex: khamsa w arbain = 45)
-    if (tokens[end] === AND_WORD && tokens[end + 1] !== undefined) {
+    if (AND_WORDS.includes(tokens[end]) && tokens[end + 1] !== undefined) {
       const nxt = tokens[end + 1]
       if (t in UNITS && nxt in TENS) {
         value = UNITS[t] + TENS[nxt]
@@ -196,7 +196,7 @@ function buildDescription(rawText: string, segments: (string | undefined)[]): st
   desc = desc
     .replace(/\s+/g, ' ')
     .replace(/^[\s,.-]+|[\s,.-]+$/g, '')
-    .replace(/^(w|b|fi|el|la|le|de|du|pour|li|men)\s+/i, '')
+    .replace(/^(w|b|fi|el|la|le|de|du|pour|li|men|و|في|على|ل)\s+/i, '')
     .trim()
   if (!desc) return ''
   return desc.charAt(0).toUpperCase() + desc.slice(1)

@@ -12,48 +12,48 @@ import type { Category } from '@/types'
 
 /** Nombres écrits en toutes lettres (arabizi/français), de 0 à 19. */
 export const UNITS: Record<string, number> = {
-  sifr: 0, zero: 0,
-  wahed: 1, wa7ed: 1, wahda: 1,
-  zouz: 2, jouj: 2, zoz: 2, itnin: 2,
-  tlata: 3, thlata: 3,
-  arbaa: 4, arba3a: 4, "arb3a": 4,
-  khamsa: 5, khemsa: 5,
-  sitta: 6, setta: 6,
-  saba: 7, sab3a: 7, sabaa: 7,
-  tmenya: 8, tmania: 8,
-  tessa: 9, tes3a: 9, tsaa: 9,
-  achra: 10, "3achra": 10, aachra: 10,
-  hdach: 11, "7dach": 11,
-  tnach: 12, "athnach": 12,
-  tlettach: 13,
-  arbaatach: 14,
-  khmastach: 15,
-  settach: 16,
-  sbaatach: 17,
-  tmentach: 18,
-  tsaatach: 19,
+  sifr: 0, zero: 0, 'صفر': 0,
+  wahed: 1, wa7ed: 1, wahda: 1, 'واحد': 1, 'واحدة': 1,
+  zouz: 2, jouj: 2, zoz: 2, itnin: 2, 'اثنين': 2, 'اثنان': 2, 'زوز': 2,
+  tlata: 3, thlata: 3, 'ثلاثة': 3, 'تلاتة': 3,
+  arbaa: 4, arba3a: 4, "arb3a": 4, 'أربعة': 4, 'اربعة': 4,
+  khamsa: 5, khemsa: 5, 'خمسة': 5,
+  sitta: 6, setta: 6, 'ستة': 6,
+  saba: 7, sab3a: 7, sabaa: 7, 'سبعة': 7,
+  tmenya: 8, tmania: 8, 'ثمانية': 8, 'تمانية': 8,
+  tessa: 9, tes3a: 9, tsaa: 9, 'تسعة': 9,
+  achra: 10, "3achra": 10, aachra: 10, 'عشرة': 10, 'عشرا': 10,
+  hdach: 11, "7dach": 11, 'حداش': 11,
+  tnach: 12, "athnach": 12, 'طناش': 12,
+  tlettach: 13, 'تلطاش': 13,
+  arbaatach: 14, 'أربعطاش': 14,
+  khmastach: 15, 'خمسطاش': 15,
+  settach: 16, 'سطاش': 16,
+  sbaatach: 17, 'سبعطاش': 17,
+  tmentach: 18, 'تمنطاش': 18,
+  tsaatach: 19, 'تسعطاش': 19,
 }
 
 export const TENS: Record<string, number> = {
-  achrin: 20, "3achrin": 20, ichrin: 20,
-  tlatin: 30, thlatin: 30,
-  arbain: 40, "arb3in": 40,
-  khamsin: 50, khemsin: 50,
-  settin: 60,
-  sabain: 70, "sab3in": 70,
-  tmanin: 80,
-  tesain: 90, "tes3in": 90,
+  achrin: 20, "3achrin": 20, ichrin: 20, 'عشرين': 20, 'عشرون': 20,
+  tlatin: 30, thlatin: 30, 'ثلاثين': 30, 'ثلاثون': 30,
+  arbain: 40, "arb3in": 40, 'أربعين': 40, 'اربعين': 40,
+  khamsin: 50, khemsin: 50, 'خمسين': 50,
+  settin: 60, 'ستين': 60,
+  sabain: 70, "sab3in": 70, 'سبعين': 70,
+  tmanin: 80, 'ثمانين': 80, 'تمانين': 80,
+  tesain: 90, "tes3in": 90, 'تسعين': 90,
 }
 
-export const HUNDRED_WORDS = ['miya', 'mya', 'meya']
-export const THOUSAND_WORDS = ['alf', 'alaf', "elf"]
-/** Conjonction "et" utilisée pour composer les nombres (ex: wahed w achrin = 21). */
-export const AND_WORD = 'w'
+export const HUNDRED_WORDS = ['miya', 'mya', 'meya', 'مية', 'مئة', 'مائة']
+export const THOUSAND_WORDS = ['alf', 'alaf', "elf", 'الف', 'ألف']
+/** Conjonctions "et" utilisées pour composer les nombres (ex: wahed w achrin = 21, واحد و عشرين). */
+export const AND_WORDS = ['w', 'و']
 
 /** Mots désignant explicitement le dinar tunisien. */
-export const CURRENCY_DINAR = ['dinar', 'dinars', 'dt', 'd.t', 'tnd', 'din']
+export const CURRENCY_DINAR = ['dinar', 'dinars', 'dt', 'd.t', 'tnd', 'din', 'دينار', 'دينارا', 'دنانير']
 /** Le millime (1/1000 de dinar). */
-export const CURRENCY_MILLIME = ['millim', 'millime', 'millimes', 'melim']
+export const CURRENCY_MILLIME = ['millim', 'millime', 'millimes', 'melim', 'مليم', 'مليمات']
 
 /**
  * Verbes/expressions signalant une action de dépense.
@@ -74,6 +74,7 @@ export const EXPENSE_VERBS = [
   "j'ai acheté", "jai achete",
   "j'ai pris", "jai pris",
   'payé', 'paye', 'dépensé', 'depense', 'acheté', 'achete',
+  'صرفت', 'دفعت', 'خلصت', 'اشتريت', 'شريت', 'خذيت', 'قضيت',
 ]
 
 /**
@@ -92,6 +93,10 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'restaurant', 'resto', 'café', 'cafe', "9ahwa", 'gahwa', 'mahal',
     'ftour', 'ghda', 'aacha', "3icha", 'ftar',
     'pizza', 'sandwich', 'chawarma', 'tacos',
+    'أكل', 'ماكلة', 'طعام', 'خضرة', 'خضروات', 'فواكه', 'غلال',
+    'لحم', 'دجاج', 'سمك', 'حوت', 'خبز',
+    'عطار', 'سوق', 'مطعم', 'مقهى', 'قهوة',
+    'فطور', 'غداء', 'عشاء',
   ],
   transport: [
     'transport', 'taxi', 'louage', 'kraa', 'bus', 'métro', 'metro', 'train',
@@ -99,6 +104,9 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'parking', 'parc', 'autoroute', 'péage', 'peage',
     'voiture', 'sayara', "siyara", 'moto', 'triporteur',
     'billet', 'ticket', 'abonnement transport',
+    'نقل', 'تاكسي', 'لواج', 'حافلة', 'بوسطة', 'مترو', 'قطار',
+    'بنزين', 'مازوط', 'غازوال', 'وقود',
+    'موقف', 'سيارة', 'دراجة نارية',
   ],
   logement: [
     'kra', 'kraya', 'loyer', 'sokna', 'logement', 'appartement',
@@ -108,6 +116,8 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'internet', 'wifi', 'topnet', 'ooredoo', 'orange', 'tunisie telecom',
     'telephone', 'téléphone', 'forfait', 'recharge',
     'menage', 'ménage', 'entretien', 'reparation', 'réparation',
+    'كراء', 'سكن', 'شقة', 'فاتورة', 'فواتير',
+    'كهرباء', 'ماء', 'غاز', 'انترنت', 'هاتف', 'تليفون', 'صيانة',
   ],
   shopping: [
     'hwayej', "7wayej", 'hwayj', 'vetements', 'vêtements', 'nsibet',
@@ -116,12 +126,15 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'hdiya', 'cadeau', 'cadeaux',
     'zina', 'maquillage', 'parfum',
     'telephone portable', 'mobile', 'accessoires',
+    'حوايج', 'ملابس', 'أحذية', 'صباط', 'تسوق', 'هدية', 'عطر', 'مكياج',
   ],
   loisirs: [
     'cinéma', 'cinema', 'sortie', 'sorties', 'voyage', 'vacances',
     'jeux', "jeu vidéo", 'jeu video', 'abonnement', 'netflix', 'spotify',
     'concert', 'match', 'foot', 'plage', 'piscine', 'fsha', 'tafarej',
     'gym', 'sport', 'salle de sport',
+    'سينما', 'خروجة', 'سفر', 'عطلة', 'ألعاب', 'حفلة', 'مباراة',
+    'كرة', 'شاطئ', 'مسبح', 'رياضة', 'نادي رياضي',
   ],
   sante: [
     'tbib', 'toubib', 'docteur', 'médecin', 'medecin',
@@ -129,12 +142,16 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'hopital', 'hôpital', 'clinique', 'clinic',
     'dentiste', 'sinane',
     'analyse', 'radio', 'consultation',
+    'طبيب', 'دكتور', 'دواء', 'صيدلية', 'مستشفى', 'عيادة',
+    'طبيب أسنان', 'أسنان', 'تحليل', 'أشعة', 'استشارة',
   ],
   education: [
     'ecole', 'école', 'université', 'universite', 'faculté', 'faculte',
     'livre', 'livres', 'ktab', 'kotob',
     'formation', 'cours', 'droos', 'inscription',
     'crayon', 'fourniture', 'fournitures scolaires',
+    'مدرسة', 'جامعة', 'كلية', 'كتاب', 'كتب',
+    'تكوين', 'دروس', 'تسجيل', 'قلم', 'لوازم مدرسية',
   ],
   autre: [],
 }
@@ -142,17 +159,18 @@ export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
 /** Expressions de date relative, en jours par rapport à aujourd'hui (0). */
 export const RELATIVE_DATES: Record<string, number> = {
   lyoum: 0, lyouma: 0, elyoum: 0, "el youm": 0, aujourdhui: 0, "aujourd'hui": 0,
-  lbereh: -1, lbare7: -1, lbarah: -1, hier: -1,
-  "awal ams": -2, "avant hier": -2, "avant-hier": -2,
+  'اليوم': 0,
+  lbereh: -1, lbare7: -1, lbarah: -1, hier: -1, 'أمس': -1, 'البارح': -1,
+  "awal ams": -2, "avant hier": -2, "avant-hier": -2, 'أول أمس': -2, 'أول البارح': -2,
 }
 
 /** Jours de la semaine (index JS: 0 = dimanche). */
 export const WEEKDAYS: Record<string, number> = {
-  hed: 0, lhed: 0, dimanche: 0,
-  litnin: 1, ethnin: 1, lundi: 1,
-  ttlata: 2, thlata: 2, mardi: 2,
-  larbaa: 3, larbaa3: 3, mercredi: 3,
-  lkhmis: 4, khmiss: 4, jeudi: 4,
-  jemaa: 5, jomaa: 5, vendredi: 5,
-  sebt: 6, samedi: 6,
+  hed: 0, lhed: 0, dimanche: 0, 'الأحد': 0,
+  litnin: 1, ethnin: 1, lundi: 1, 'الاثنين': 1,
+  ttlata: 2, thlata: 2, mardi: 2, 'الثلاثاء': 2,
+  larbaa: 3, larbaa3: 3, mercredi: 3, 'الأربعاء': 3,
+  lkhmis: 4, khmiss: 4, jeudi: 4, 'الخميس': 4,
+  jemaa: 5, jomaa: 5, vendredi: 5, 'الجمعة': 5,
+  sebt: 6, samedi: 6, 'السبت': 6,
 }
