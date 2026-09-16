@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { formatDateFR, syncSessionCharges } from '@/lib/sessionSync'
+import { useToast } from '@/context/ToastContext'
 import type { Expense, NewExpense } from '@/types'
 
 /**
@@ -9,6 +11,7 @@ import type { Expense, NewExpense } from '@/types'
  * Un canal realtime garde la liste synchronisée entre appareils.
  */
 export function useExpenses(userId: string | undefined) {
+  const toast = useToast()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -87,21 +90,43 @@ export function useExpenses(userId: string | undefined) {
       }
 
       setExpenses((prev) => prev.map((e) => (e.id === tempId ? (data as Expense) : e)))
+
+      const synced = await syncSessionCharges(expense.expense_date, expense.amount)
+      if (synced && !synced.matched) {
+        toast.warning(
+          `Dépense enregistrée, mais aucune session du ${formatDateFR(expense.expense_date)} trouvée pour la synchronisation.`,
+        )
+      }
+
       return { error: null }
     },
-    [userId],
+    [userId, toast],
   )
 
-  const deleteExpense = useCallback(async (id: string): Promise<{ error: string | null }> => {
-    const previous = expenses
-    setExpenses((prev) => prev.filter((e) => e.id !== id))
-    const { error: deleteError } = await supabase.from('expenses').delete().eq('id', id)
-    if (deleteError) {
-      setExpenses(previous)
-      return { error: deleteError.message }
-    }
-    return { error: null }
-  }, [expenses])
+  const deleteExpense = useCallback(
+    async (id: string): Promise<{ error: string | null }> => {
+      const previous = expenses
+      const target = expenses.find((e) => e.id === id)
+      setExpenses((prev) => prev.filter((e) => e.id !== id))
+      const { error: deleteError } = await supabase.from('expenses').delete().eq('id', id)
+      if (deleteError) {
+        setExpenses(previous)
+        return { error: deleteError.message }
+      }
+
+      if (target) {
+        const synced = await syncSessionCharges(target.expense_date, -target.amount)
+        if (synced && !synced.matched) {
+          toast.warning(
+            `Dépense supprimée, mais aucune session du ${formatDateFR(target.expense_date)} trouvée pour la synchronisation.`,
+          )
+        }
+      }
+
+      return { error: null }
+    },
+    [expenses, toast],
+  )
 
   return { expenses, loading, error, addExpense, deleteExpense, refetch }
 }
