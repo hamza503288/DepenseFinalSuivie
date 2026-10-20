@@ -2,15 +2,22 @@
  * Types partagés de l'application Masrouf.
  */
 
-/** Les 8 catégories de dépenses reconnues par le parser et les graphiques. */
+/** Les 15 catégories de dépenses reconnues par le parser et les graphiques ('autre' toujours en dernier). */
 export const CATEGORIES = [
   'alimentation',
+  'courses',
   'transport',
   'logement',
+  'maison',
   'shopping',
   'loisirs',
+  'sport',
+  'voyage',
   'sante',
   'education',
+  'animaux',
+  'it',
+  'pret',
   'autre',
 ] as const
 
@@ -18,24 +25,38 @@ export type Category = (typeof CATEGORIES)[number]
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   alimentation: 'Alimentation',
+  courses: 'Courses',
   transport: 'Transport',
   logement: 'Logement & factures',
+  maison: 'Maison',
   shopping: 'Shopping',
   loisirs: 'Loisirs',
+  sport: 'Sport',
+  voyage: 'Voyage',
   sante: 'Santé',
   education: 'Éducation',
+  animaux: 'Animaux',
+  it: 'IT & high-tech',
+  pret: 'Prêt & crédit',
   autre: 'Autre',
 }
 
 /** Icônes lucide-react associées à chaque catégorie (nom du composant). */
 export const CATEGORY_ICONS: Record<Category, string> = {
   alimentation: 'UtensilsCrossed',
+  courses: 'ShoppingCart',
   transport: 'Car',
   logement: 'Home',
+  maison: 'Sofa',
   shopping: 'ShoppingBag',
   loisirs: 'PartyPopper',
+  sport: 'Dumbbell',
+  voyage: 'Plane',
   sante: 'HeartPulse',
   education: 'GraduationCap',
+  animaux: 'PawPrint',
+  it: 'Laptop',
+  pret: 'HandCoins',
   autre: 'CircleDollarSign',
 }
 

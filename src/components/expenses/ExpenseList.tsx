@@ -42,9 +42,14 @@ export function ExpenseList({ expenses, onDelete, emptyMessage }: ExpenseListPro
     <div className="flex flex-col gap-5">
       {groupByDate(expenses).map(([date, items]) => (
         <div key={date}>
-          <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-            {formatDateHeading(date)}
-          </h3>
+          <div className="mb-2 flex items-baseline justify-between px-1">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              {formatDateHeading(date)}
+            </h3>
+            <span className="text-xs font-semibold tabular-nums text-[var(--text-secondary)]">
+              {items.reduce((s, e) => s + e.amount, 0).toFixed(3)} DT
+            </span>
+          </div>
           <ul className="flex flex-col gap-2">
             <AnimatePresence initial={false}>
               {items.map((expense) => (

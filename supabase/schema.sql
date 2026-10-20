@@ -15,8 +15,9 @@ create table if not exists public.expenses (
   amount        numeric(10, 3) not null check (amount > 0),
   category      text not null check (
                   category in (
-                    'alimentation', 'transport', 'logement', 'shopping',
-                    'loisirs', 'sante', 'education', 'autre'
+                    'alimentation', 'courses', 'transport', 'logement', 'maison',
+                    'shopping', 'loisirs', 'sport', 'voyage', 'sante',
+                    'education', 'animaux', 'it', 'pret', 'autre'
                   )
                 ),
   description   text not null default '',
@@ -30,6 +31,16 @@ create table if not exists public.expenses (
 
 create index if not exists expenses_user_date_idx on public.expenses (user_id, expense_date desc);
 create index if not exists expenses_user_category_idx on public.expenses (user_id, category);
+
+-- Migration des bases existantes : la contrainte d'origine ne connaissait que 8 catégories.
+alter table public.expenses drop constraint if exists expenses_category_check;
+alter table public.expenses add constraint expenses_category_check check (
+  category in (
+    'alimentation', 'courses', 'transport', 'logement', 'maison',
+    'shopping', 'loisirs', 'sport', 'voyage', 'sante',
+    'education', 'animaux', 'it', 'pret', 'autre'
+  )
+);
 
 alter table public.expenses enable row level security;
 
@@ -58,8 +69,9 @@ create table if not exists public.budgets (
   period          text not null check (period in ('jour', 'semaine', 'mois')),
   category        text check (
                     category is null or category in (
-                      'alimentation', 'transport', 'logement', 'shopping',
-                      'loisirs', 'sante', 'education', 'autre'
+                      'alimentation', 'courses', 'transport', 'logement', 'maison',
+                      'shopping', 'loisirs', 'sport', 'voyage', 'sante',
+                      'education', 'animaux', 'it', 'pret', 'autre'
                     )
                   ),
   limit_amount    numeric(10, 3) not null check (limit_amount > 0),
@@ -70,6 +82,15 @@ create table if not exists public.budgets (
 -- Un seul budget par utilisateur/période/catégorie (catégorie nulle = budget global)
 create unique index if not exists budgets_unique_scope
   on public.budgets (user_id, period, coalesce(category, 'GLOBAL'));
+
+alter table public.budgets drop constraint if exists budgets_category_check;
+alter table public.budgets add constraint budgets_category_check check (
+  category is null or category in (
+    'alimentation', 'courses', 'transport', 'logement', 'maison',
+    'shopping', 'loisirs', 'sport', 'voyage', 'sante',
+    'education', 'animaux', 'it', 'pret', 'autre'
+  )
+);
 
 alter table public.budgets enable row level security;
 

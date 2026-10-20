@@ -105,3 +105,18 @@ describe('parseExpenseText — confiance', () => {
     expect(r.confidence).toBeLessThan(0.3)
   })
 })
+
+describe('parseExpenseText — nouvelles catégories', () => {
+  it.each([
+    ['chrit courses mel carrefour b 80 dinars', 'courses'],
+    ['khallast 300dt canapé', 'maison'],
+    ['abonnement salle de sport 60dt', 'sport'],
+    ['dfaat 900 dinars hotel djerba', 'voyage'],
+    ['croquettes lel qattous 25dt', 'animaux'],
+    ['chrit clavier w souris 70 dinars', 'it'],
+    ['dfaat traite crédit 450dt', 'pret'],
+    ["j'ai fait un achat de 30 dinars", 'shopping'],
+  ])('« %s » → %s', (text, category) => {
+    expect(parseExpenseText(text).category).toBe(category)
+  })
+})

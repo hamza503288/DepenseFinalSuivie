@@ -54,6 +54,13 @@
   --color-cat-sante: #008300;
   --color-cat-education: #4a3aa7;
   --color-cat-autre: #e34948;
+  --color-cat-courses: #00897b;
+  --color-cat-maison: #a0662f;
+  --color-cat-sport: #7cb518;
+  --color-cat-voyage: #00a6e6;
+  --color-cat-animaux: #c2571a;
+  --color-cat-it: #a33ea1;
+  --color-cat-pret: #b0a000;
 }
 
 @media (prefers-color-scheme: dark) {

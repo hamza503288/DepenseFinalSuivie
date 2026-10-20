@@ -7,6 +7,13 @@ import {
   HeartPulse,
   GraduationCap,
   CircleDollarSign,
+  ShoppingCart,
+  Sofa,
+  Dumbbell,
+  Plane,
+  PawPrint,
+  Laptop,
+  HandCoins,
   type LucideProps,
 } from 'lucide-react'
 import type { Category } from '@/types'
@@ -21,6 +28,13 @@ const ICON_MAP: Record<string, React.ComponentType<LucideProps>> = {
   HeartPulse,
   GraduationCap,
   CircleDollarSign,
+  ShoppingCart,
+  Sofa,
+  Dumbbell,
+  Plane,
+  PawPrint,
+  Laptop,
+  HandCoins,
 }
 
 /** Couleur catégorielle en variable CSS (voir @theme dans index.css). */
